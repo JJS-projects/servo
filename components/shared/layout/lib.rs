@@ -24,7 +24,9 @@ use base::Epoch;
 use base::generic_channel::GenericSender;
 use base::id::{BrowsingContextId, PipelineId, WebViewId};
 use bitflags::bitflags;
-use embedder_traits::{Cursor, Theme, UntrustedNodeAddress, ViewportDetails};
+use embedder_traits::{
+    Cursor, TerminalLayoutNode, Theme, UntrustedNodeAddress, ViewportDetails,
+};
 use euclid::{Point2D, Rect};
 use fonts::{FontContext, WebFontDocumentContext};
 pub use layout_damage::LayoutDamage;
@@ -380,6 +382,7 @@ pub trait Layout {
         flags: ElementsFromPointFlags,
     ) -> Vec<ElementsFromPointResult>;
     fn query_effective_overflow(&self, node: TrustedNodeAddress) -> Option<AxesOverflow>;
+    fn query_terminal_layout_tree(&self, node: TrustedNodeAddress) -> Option<TerminalLayoutNode>;
     fn register_custom_property(
         &mut self,
         property_registration: PropertyRegistration,

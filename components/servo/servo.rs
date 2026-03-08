@@ -503,6 +503,13 @@ impl ServoInner {
                     webview.set_load_status(load_status);
                 }
             },
+            EmbedderMsg::TerminalLayoutChanged(webview_id, layout) => {
+                if let Some(webview) = self.get_webview_handle(webview_id) {
+                    webview
+                        .delegate()
+                        .notify_terminal_layout_changed(webview, layout);
+                }
+            },
             EmbedderMsg::HistoryTraversalComplete(webview_id, traversal_id) => {
                 if let Some(webview) = self.get_webview_handle(webview_id) {
                     webview

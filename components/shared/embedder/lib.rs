@@ -254,6 +254,98 @@ impl<T> Clone for GenericEmbedderProxy<T> {
 
 pub type EmbedderProxy = GenericEmbedderProxy<EmbedderMsg>;
 
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct TerminalLayoutNode {
+    pub kind: TerminalNodeKind,
+    pub rect: Option<TerminalRect>,
+    pub style: Option<TerminalCssProperties>,
+    pub children: Vec<TerminalLayoutNode>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+pub struct TerminalRect {
+    pub x: f32,
+    pub y: f32,
+    pub width: f32,
+    pub height: f32,
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub enum TerminalNodeKind {
+    Document,
+    Element(TerminalElementData),
+    Text(String),
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct TerminalElementData {
+    pub tag_name: String,
+    pub role: TerminalElementRole,
+    pub href: Option<String>,
+    pub src: Option<String>,
+    pub alt: Option<String>,
+    pub value: Option<String>,
+    pub title: Option<String>,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub enum TerminalElementRole {
+    Generic,
+    Link,
+    Button,
+    Input,
+    TextArea,
+    Image,
+    Select,
+    IFrame,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct TerminalColor {
+    pub r: u8,
+    pub g: u8,
+    pub b: u8,
+    pub a: u8,
+}
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub enum TerminalDisplay {
+    None,
+    Contents,
+    Inline,
+    Block,
+    InlineBlock,
+    FlowRoot,
+    Flex,
+    InlineFlex,
+    Grid,
+    InlineGrid,
+    Table,
+    InlineTable,
+    TableCaption,
+    TableCell,
+    TableRow,
+    TableRowGroup,
+    TableColumn,
+    TableColumnGroup,
+    TableHeaderGroup,
+    TableFooterGroup,
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct TerminalCssProperties {
+    pub display: TerminalDisplay,
+    pub visible: bool,
+    pub color: TerminalColor,
+    pub background_color: TerminalColor,
+    pub bold: bool,
+    pub italic: bool,
+    pub underline: bool,
+    pub overline: bool,
+    pub line_through: bool,
+    pub preserve_whitespace: bool,
+}
+
 /// A [`RefreshDriver`] is a trait that can be implemented by Servo embedders in
 /// order to drive let Servo know when to start preparing the next frame. For example,
 /// on systems that support Vsync notifications, an embedder may want to implement
@@ -468,6 +560,8 @@ pub enum EmbedderMsg {
     NotifyFullscreenStateChanged(WebViewId, bool),
     /// The [`LoadStatus`] of the Given `WebView` has changed.
     NotifyLoadStatusChanged(WebViewId, LoadStatus),
+    /// A post-layout terminal-friendly snapshot of the current document.
+    TerminalLayoutChanged(WebViewId, TerminalLayoutNode),
     /// A pipeline panicked. First string is the reason, second one is the backtrace.
     Panic(WebViewId, String, Option<String>),
     /// Open dialog to select bluetooth device.

@@ -16,7 +16,7 @@ use embedder_traits::{
     EmbedderControlResponse, FilePickerRequest, FilterPattern, InputEventId, InputEventResult,
     InputMethodType, LoadStatus, MediaSessionEvent, NewWebViewDetails, Notification,
     PermissionFeature, PromptResponse, RgbColor, ScreenGeometry, SelectElementOptionOrOptgroup,
-    SimpleDialogRequest, TraversalId, WebResourceRequest, WebResourceResponse,
+    SimpleDialogRequest, TerminalLayoutNode, TraversalId, WebResourceRequest, WebResourceResponse,
     WebResourceResponseMsg,
 };
 use paint_api::rendering_context::RenderingContext;
@@ -847,6 +847,9 @@ pub trait WebViewDelegate {
     /// The [`Cursor`] of the currently loaded page in this [`WebView`] has changed. The new
     /// cursor can accessed via [`WebView::cursor`].
     fn notify_cursor_changed(&self, _webview: WebView, _: Cursor) {}
+    /// A fresh post-layout snapshot is available for embedders that want to render the page
+    /// without Servo's compositor, such as a terminal UI.
+    fn notify_terminal_layout_changed(&self, _webview: WebView, _layout: TerminalLayoutNode) {}
     /// The favicon of the currently loaded page in this [`WebView`] has changed. The new
     /// favicon [`Image`] can accessed via [`WebView::favicon`].
     fn notify_favicon_changed(&self, _webview: WebView) {}

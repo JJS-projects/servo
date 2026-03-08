@@ -16,7 +16,7 @@ use base::generic_channel::GenericSender;
 use base::id::{PipelineId, WebViewId};
 use bitflags::bitflags;
 use cssparser::ParserInput;
-use embedder_traits::{Theme, ViewportDetails};
+use embedder_traits::{TerminalLayoutNode, Theme, ViewportDetails};
 use euclid::{Point2D, Rect, Scale, Size2D};
 use fonts::{FontContext, FontContextWebFontMethods, WebFontDocumentContext};
 use fonts_traits::StylesheetWebFontLoadFinishedCallback;
@@ -94,6 +94,7 @@ use crate::query::{
     process_offset_parent_query, process_padding_request, process_resolved_font_style_query,
     process_resolved_style_request, process_scroll_container_query,
 };
+use crate::terminal_bridge::build_terminal_layout_tree;
 use crate::traversal::{RecalcStyle, compute_damage_and_rebuild_box_tree};
 use crate::{BoxTree, FragmentTree};
 
@@ -550,6 +551,16 @@ impl Layout for LayoutThread {
         with_layout_state(|| {
             let node = unsafe { ServoLayoutNode::new(&node).to_threadsafe() };
             process_effective_overflow_query(node)
+        })
+    }
+
+    #[servo_tracing::instrument(skip_all)]
+    fn query_terminal_layout_tree(&self, node: TrustedNodeAddress) -> Option<TerminalLayoutNode> {
+        with_layout_state(|| {
+            let node = unsafe { ServoLayoutNode::new(&node).to_threadsafe() };
+            let fragment_tree = self.fragment_tree.borrow();
+            let fragment_tree = fragment_tree.as_ref()?;
+            build_terminal_layout_tree(node, fragment_tree)
         })
     }
 

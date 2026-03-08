@@ -30,6 +30,7 @@ mod replaced;
 mod sizing;
 mod style_ext;
 pub mod table;
+pub mod terminal_bridge;
 mod traversal;
 
 use app_units::Au;

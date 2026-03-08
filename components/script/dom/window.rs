@@ -2605,8 +2605,9 @@ impl Window {
         let document_context = self.web_font_context();
 
         // Send new document and relevant styles to layout.
+        let document_node_address = document.upcast::<Node>().to_trusted_node_address();
         let reflow = ReflowRequest {
-            document: document.upcast::<Node>().to_trusted_node_address(),
+            document: document_node_address,
             epoch: document.current_rendering_epoch(),
             restyle,
             viewport_details: self.viewport_details.get(),
@@ -2642,6 +2643,20 @@ impl Window {
         }
 
         document.update_animations_post_reflow();
+
+        if let Some(root_node_address) = document
+            .GetDocumentElement()
+            .map(|root| root.upcast::<Node>().to_trusted_node_address())
+        {
+            if let Some(terminal_layout) =
+                self.layout.borrow().query_terminal_layout_tree(root_node_address)
+            {
+                self.send_to_embedder(EmbedderMsg::TerminalLayoutChanged(
+                    self.webview_id(),
+                    terminal_layout,
+                ));
+            }
+        }
 
         (
             reflow_result.reflow_phases_run,
